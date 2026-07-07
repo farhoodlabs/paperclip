@@ -18,6 +18,8 @@ import { useDialogActions } from "../context/DialogContext";
 import { useSidebar } from "../context/SidebarContext";
 import { useToastActions } from "../context/ToastContext";
 import { agentsApi } from "../api/agents";
+import { builtInAgentsApi, type BuiltInAgentStatus } from "../api/builtInAgents";
+import { BuiltInAgentBadge, BuiltInLifecycleChip } from "./BuiltInAgentBadges";
 import { authApi } from "../api/auth";
 import { heartbeatsApi } from "../api/heartbeats";
 import { SIDEBAR_SCROLL_RESET_STATE } from "../lib/navigation-scroll";
@@ -111,6 +113,7 @@ function SidebarAgentItem({
   rail,
   runCount,
   setSidebarOpen,
+  builtInStatus,
   starred = false,
   onToggleStar,
   starPending = false,
@@ -126,6 +129,7 @@ function SidebarAgentItem({
   rail: boolean;
   runCount: number;
   setSidebarOpen: (open: boolean) => void;
+  builtInStatus?: BuiltInAgentStatus;
   starred?: boolean;
   onToggleStar?: (agent: Agent, starred: boolean) => void;
   starPending?: boolean;
@@ -164,7 +168,15 @@ function SidebarAgentItem({
       )}
     >
       <AgentIcon icon={agent.icon} className="shrink-0 h-3.5 w-3.5 text-muted-foreground" />
-      <span className={rail ? SIDEBAR_RAIL_HIDDEN_LABEL : "flex-1 truncate"}>{agent.name}</span>
+      <span className={rail ? SIDEBAR_RAIL_HIDDEN_LABEL : cn(!builtInStatus && "flex-1", "min-w-0 truncate")}>
+        {agent.name}
+      </span>
+      {!rail && builtInStatus ? (
+        <span className="ml-1 flex flex-1 items-center gap-1 shrink-0">
+          <BuiltInAgentBadge compact />
+          <BuiltInLifecycleChip status={builtInStatus} compact />
+        </span>
+      ) : null}
       {!rail && hasInvalidOrgChain ? (
         <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-500" aria-label="Invalid reporting chain" />
       ) : null}
@@ -316,6 +328,18 @@ export function SidebarAgents({ streamlined = false }: { streamlined?: boolean }
     queryFn: () => agentsApi.list(selectedCompanyId!),
     enabled: !!selectedCompanyId,
   });
+  const { data: builtInAgents } = useQuery({
+    queryKey: queryKeys.builtInAgents.list(selectedCompanyId!),
+    queryFn: () => builtInAgentsApi.list(selectedCompanyId!),
+    enabled: !!selectedCompanyId,
+  });
+  const builtInStatusByAgentId = useMemo(() => {
+    const map = new Map<string, BuiltInAgentStatus>();
+    for (const entry of builtInAgents ?? []) {
+      if (entry.agentId) map.set(entry.agentId, entry.status);
+    }
+    return map;
+  }, [builtInAgents]);
   const { data: session } = useQuery({
     queryKey: queryKeys.auth.session,
     queryFn: () => authApi.getSession(),
@@ -542,6 +566,7 @@ export function SidebarAgents({ streamlined = false }: { streamlined?: boolean }
       rail={rail}
       runCount={liveCountByAgent.get(agent.id) ?? 0}
       setSidebarOpen={setSidebarOpen}
+      builtInStatus={builtInStatusByAgentId.get(agent.id)}
       starred={isStarredRow || isStarred(membershipsQuery.data, "agent", agent.id)}
       onToggleStar={toggleStarAgent}
       starPending={agentStarPending(agent)}
