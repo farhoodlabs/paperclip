@@ -168,11 +168,24 @@ function SidebarAgentItem({
       )}
     >
       <AgentIcon icon={agent.icon} className="shrink-0 h-3.5 w-3.5 text-muted-foreground" />
-      <span className={rail ? SIDEBAR_RAIL_HIDDEN_LABEL : cn(!builtInStatus && "flex-1", "min-w-0 truncate")}>
+      <span
+        className={
+          rail
+            ? SIDEBAR_RAIL_HIDDEN_LABEL
+            : cn(
+                "truncate",
+                // The name is the primary identifier: on built-in rows keep it
+                // above a usable floor (so it ellipsizes instead of collapsing
+                // to zero under the compact chips) rather than growing; on plain
+                // rows it grows to fill as before (PAP-12988).
+                builtInStatus ? "min-w-[4.5rem]" : "flex-1 min-w-0",
+              )
+        }
+      >
         {agent.name}
       </span>
       {!rail && builtInStatus ? (
-        <span className="ml-1 flex flex-1 items-center gap-1 shrink-0">
+        <span className="ml-1 flex items-center gap-1 shrink-0">
           <BuiltInAgentBadge compact />
           <BuiltInLifecycleChip status={builtInStatus} compact />
         </span>
