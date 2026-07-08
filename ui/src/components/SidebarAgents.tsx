@@ -178,7 +178,7 @@ function SidebarAgentItem({
                 // above a usable floor (so it ellipsizes instead of collapsing
                 // to zero under the compact chips) rather than growing; on plain
                 // rows it grows to fill as before (PAP-12988).
-                builtInStatus ? "min-w-[4.5rem]" : "flex-1 min-w-0",
+                builtInStatus ? "min-w-(--sz-4_5rem)" : "flex-1 min-w-0",
               )
         }
       >
