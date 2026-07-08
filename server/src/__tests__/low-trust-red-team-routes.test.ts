@@ -62,16 +62,25 @@ async function waitFor(condition: () => boolean | Promise<boolean>, timeoutMs = 
   throw new Error("Timed out waiting for condition");
 }
 
+function isHeartbeatRunEventFkError(error: unknown) {
+  const message = error instanceof Error ? `${error.message} ${String(error.cause ?? "")}` : String(error);
+  return message.includes("heartbeat_run_events_run_id_heartbeat_runs_id_fk");
+}
+
 async function deleteHeartbeatRunsAndWakeupsAfterActivityLogDrains(db: Db) {
   let lastError: unknown = null;
   for (let attempt = 0; attempt < 10; attempt += 1) {
     await db.delete(activityLog);
+    await db.delete(heartbeatRunEvents);
     try {
       await db.delete(heartbeatRuns);
       await db.delete(agentWakeupRequests);
       return;
     } catch (error) {
       lastError = error;
+      if (!isHeartbeatRunEventFkError(error)) {
+        throw error;
+      }
       await new Promise((resolve) => setTimeout(resolve, 25));
     }
   }
