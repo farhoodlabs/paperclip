@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
-import { act } from "react";
 import type { ReactNode } from "react";
+import { flushSync } from "react-dom";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Inbox } from "lucide-react";
@@ -51,7 +51,7 @@ describe("SidebarNavItem", () => {
   });
 
   afterEach(() => {
-    act(() => {
+    flushSync(() => {
       root.unmount();
     });
     container.remove();
@@ -59,7 +59,7 @@ describe("SidebarNavItem", () => {
   });
 
   function render(node: ReactNode) {
-    act(() => {
+    flushSync(() => {
       root.render(<TooltipProvider>{node}</TooltipProvider>);
     });
   }
@@ -100,6 +100,23 @@ describe("SidebarNavItem", () => {
     // Tooltip wraps the row; the trigger is the wrapper element so the NavLink's
     // own flex className is preserved (PAP-10676), with the <a> nested inside it.
     expect(link().parentElement?.getAttribute("data-slot")).toBe("tooltip-trigger");
+  });
+
+  it("surfaces the trailing status label in the rail aria-label", () => {
+    sidebarState.collapsed = true;
+    render(
+      <SidebarNavItem
+        to="/agents/codexcoder"
+        label="CodexCoder"
+        icon={Inbox}
+        trailing={<span aria-label="Invalid reporting chain" />}
+        trailingLabel="Invalid reporting chain"
+      />,
+    );
+
+    // The trailing warning is hidden in the rail, so its text equivalent must
+    // ride on the link's accessible name.
+    expect(link().getAttribute("aria-label")).toBe("CodexCoder, Invalid reporting chain");
   });
 
   it("keeps the full presentation while peeking even when collapsed", () => {

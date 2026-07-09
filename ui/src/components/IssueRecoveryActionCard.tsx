@@ -28,6 +28,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { agentUrl } from "@/lib/utils";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 import {
   deriveRecoveryDisplayState,
   type RecoveryDisplayState,
@@ -354,15 +355,15 @@ function DivergenceDiagnosis({
         <span className="text-(length:--text-micro) font-semibold uppercase tracking-(--tracking-eyebrow) text-muted-foreground">
           Divergence diagnosis
         </span>
-        <span
+        <Badge variant="outline"
           data-testid="recovery-ancestry-verdict"
           className={cn(
-            "inline-flex items-center rounded-full border px-2 py-0.5 text-(length:--text-nano) font-semibold uppercase tracking-(--tracking-label)",
+            "text-(length:--text-nano) font-semibold uppercase tracking-(--tracking-label)",
             badge.className,
           )}
         >
           {badge.label}
-        </span>
+        </Badge>
       </div>
       <div className="grid gap-2 sm:grid-cols-2">
         <BranchFacet

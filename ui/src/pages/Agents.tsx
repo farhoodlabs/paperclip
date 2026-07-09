@@ -555,7 +555,7 @@ export function Agents() {
 
       {/* List view */}
       {effectiveView === "list" && filtered.length > 0 && (
-        <div className="border border-border">
+        <div>
           {filtered.map(renderAgentRow)}
         </div>
       )}
@@ -568,7 +568,7 @@ export function Agents() {
 
       {/* Org chart view */}
       {effectiveView === "org" && filteredOrg.length > 0 && (
-        <div className="border border-border py-1">
+        <div className="py-1">
           {filteredOrg.map((node) => (
             <OrgTreeNode
               key={node.id}
@@ -659,7 +659,7 @@ function OrgTreeNode({
       <Link
         to={agent ? agentUrl(agent) : `/agents/${node.id}`}
         className={cn(
-          "group flex items-center gap-3 px-3 py-2 hover:bg-accent/30 transition-colors w-full text-left no-underline text-inherit",
+          "group flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-accent/50 transition-colors w-full text-left no-underline text-inherit",
           agent?.pausedAt && tab !== "paused" && "opacity-50",
           membershipState === "left" && "text-foreground/55",
         )}
@@ -769,7 +769,7 @@ function OrgTreeNode({
         </div>
       </Link>
       {node.reports && node.reports.length > 0 && (
-        <div className="border-l border-border/50 ml-4">
+        <div className="border-l border-border ml-4">
           {node.reports.map((child) => (
             <OrgTreeNode
               key={child.id}
